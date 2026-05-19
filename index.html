@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Snack Business Dashboard</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --panel:#111827;
+      --panel-2:#0f172a;
+      --line:#243244;
+      --text:#e5e7eb;
+      --muted:#94a3b8;
+      --green:#22c55e;
+      --green-2:#16a34a;
+      --yellow:#f59e0b;
+      --red:#ef4444;
+      --blue:#38bdf8;
+      --shadow:0 10px 30px rgba(0,0,0,.25);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(56,189,248,.12), transparent 30%),
+        radial-gradient(circle at top right, rgba(34,197,94,.10), transparent 25%),
+        linear-gradient(180deg, #08101d 0%, #0b1220 100%);
+      color:var(--text);
+    }
+    .wrap{max-width:1280px;margin:0 auto;padding:24px}
+    .hero{
+      display:flex;justify-content:space-between;gap:16px;align-items:flex-end;
+      flex-wrap:wrap;margin-bottom:20px
+    }
+    h1{margin:0;font-size:2rem;letter-spacing:-.03em}
+    .sub{margin-top:6px;color:var(--muted);max-width:800px;line-height:1.5}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 12px;border-radius:999px;background:rgba(34,197,94,.12);
+      border:1px solid rgba(34,197,94,.2);color:#86efac;font-size:.9rem
+    }
+    .grid{display:grid;gap:16px}
+    .cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .card{
+      background:linear-gradient(180deg, rgba(17,24,39,.98), rgba(15,23,42,.98));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:16px;
+      box-shadow:var(--shadow);
+    }
+    .card h2,.card h3{margin:0 0 12px 0}
+    .card h2{font-size:1.1rem}
+    .card h3{font-size:1rem;color:#cbd5e1}
+    .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .stat{
+      background:#0b1220;border:1px solid #334155;border-radius:16px;padding:14px
+    }
+    .stat .n{font-size:1.5rem;font-weight:800;margin-bottom:4px}
+    .stat .l{font-size:.88rem;color:var(--muted)}
+    label{display:block;margin:10px 0 6px;color:#cbd5e1;font-size:.9rem}
+    input,select,textarea,button{
+      width:100%;border-radius:12px;border:1px solid #334155;
+      background:#0b1220;color:var(--text);padding:12px 14px;font-size:1rem
+    }
+    textarea{min-height:92px;resize:vertical}
+    input::placeholder,textarea::placeholder{color:#64748b}
+    button{
+      cursor:pointer;font-weight:700;border:none;
+      background:linear-gradient(135deg,var(--green),var(--green-2));
+      transition:.15s transform ease,.15s opacity ease;
+    }
+    button:hover{transform:translateY(-1px)}
+    .secondary{background:#1f2937;border:1px solid #334155}
+    .danger{background:linear-gradient(135deg,var(--red),#dc2626)}
+    .info{background:linear-gradient(135deg,var(--blue),#0284c7)}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .row > *{flex:1 1 180px}
+    .small{font-size:.85rem;color:var(--muted);line-height:1.45}
+    .pill{
+      display:inline-block;padding:5px 10px;border-radius:999px;
+      background:#16311f;color:#86efac;font-size:.8rem;font-weight:700
+    }
+    .warn{background:#2f230b;color:#fbbf24}
+    .bad{background:#2d1111;color:#fca5a5}
+    table{width:100%;border-collapse:collapse;overflow:hidden}
+    th,td{
+      padding:10px;border-bottom:1px solid #243244;text-align:left;font-size:.92rem;
+      vertical-align:top
+    }
+    th{color:#cbd5e1;font-weight:700}
+    tr:hover td{background:rgba(255,255,255,.015)}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    .actions button{width:auto;padding:8px 10px;font-size:.86rem;border-radius:10px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+    .topbar .actions{justify-content:flex-end}
+    .section{margin-top:16px}
+    .split{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
+    @media (max-width: 980px){
+      .cols-3,.cols-2,.split,.stats{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <h1>Snack Business Dashboard</h1>
+        <div class="sub">
+          Track inventory, sales, student orders, profit, and Smart Snacks records in one neat school-ready page.
+        </div>
+      </div>
+      <div class="badge" id="saveBadge">● Saved locally</div>
+    </div>
+
+    <div class="grid cols-3">
+      <div class="card">
+        <div class="topbar">
+          <h2>Quick Summary</h2>
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="n" id="statStock">0</div><div class="l">Items in stock</div></div>
+          <div class="stat"><div class="n" id="statRevenue">$0.00</div><div class="l">Total sales</div></div>
+          <div class="stat"><div class="n" id="statProfit">$0.00</div><div class="l">Estimated profit</div></div>
+        </div>
+        <p class="small">Use this panel to see inventory, sales, and earnings at a glance.</p>
+      </div>
+
+      <div class="card">
+        <h2>Add Snack Item</h2>
+        <label>Snack name</label>
+        <input id="itemName" placeholder="Example: Chips" />
+        <div class="row">
+          <div>
+            <label>Cost per unit</label>
+            <input id="itemCost" type="number" step="0.01" placeholder="0.50" />
+          </div>
+          <div>
+            <label>Selling price</label>
+            <input id="itemPrice" type="number" step="0.01" placeholder="1.00" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Starting stock</label>
+            <input id="itemStock" type="number" step="1" placeholder="20" />
+          </div>
+          <div>
+            <label>Low stock alert</label>
+            <input id="itemAlert" type="number" step="1" placeholder="5" />
+          </div>
+        </div>
+        <button id="addItemBtn">Add item</button>
+      </div>
+
+      <div class="card">
+        <h2>Student Order Intake</h2>
+        <label>Customer name</label>
+        <input id="orderCustomer" placeholder="Student name" />
+        <label>Item purchased</label>
+        <select id="orderItem"></select>
+        <div class="row">
+          <div>
+            <label>Quantity</label>
+            <input id="orderQty" type="number" step="1" value="1" />
+          </div>
+          <div>
+            <label>Paid?</label>
+            <select id="orderPaid">
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+        </div>
+        <button id="addOrderBtn">Log order</button>
+      </div>
+    </div>
+
+    <div class="section split">
+      <div class="card">
+        <div class="topbar">
+          <h2>Inventory</h2>
+          <div class="actions">
+            <button class="secondary" id="exportBtn">Export CSV</button>
+            <button class="danger" id="resetBtn">Reset all data</button>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Snack</th>
+              <th>Cost</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="inventoryBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Smart Snacks Log</h2>
+        <div class="small">
+          Keep nutrition labels, product details, and fundraiser records together for school compliance and audit-ready documentation.
+        </div>
+
+        <label>Product name</label>
+        <input id="smartName" placeholder="Example: Granola Bar" />
+        <label>Brand / vendor</label>
+        <input id="smartBrand" placeholder="Vendor name" />
+        <div class="row">
+          <div>
+            <label>Calories</label>
+            <input id="smartCalories" type="number" step="1" placeholder="150" />
+          </div>
+          <div>
+            <label>Sodium (mg)</label>
+            <input id="smartSodium" type="number" step="1" placeholder="120" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Sugar (g)</label>
+            <input id="smartSugar" type="number" step="0.1" placeholder="8" />
+          </div>
+          <div>
+            <label>Compliance</label>
+            <select id="smartCompliance">
+              <option>Smart Snacks Compliant</option>
+              <option>Non-exempt Fundraiser</option>
+              <option>Needs Review</option>
+            </select>
+          </div>
+        </div>
+        <label>Nutrition label / product spec notes</label>
+        <textarea id="smartNotes" placeholder="Paste nutrition facts summary, ingredients, package size, or product spec details here."></textarea>
+        <button id="addSmartBtn">Save Smart Snacks record</button>
+      </div>
+    </div>
+
+    <div class="section grid cols-2">
+      <div class="card">
+        <h2>Daily Sales Ledger</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Date / Time</th>
+              <th>Customer</th>
+              <th>Item</th>
+              <th>Qty</th>
+              <th>Paid</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody id="salesBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Fundraiser Tracking</h2>
+        <label>Fundraiser name</label>
+        <input id="fundName" placeholder="Example: Friday Snack Sale" />
+        <div class="row">
+          <div>
+            <label>Date</label>
+            <input id="fundDate" type="date" />
+          </div>
+          <div>
+            <label>Status</label>
+            <select id="fundStatus">
+              <option>Non-exempt</option>
+              <option>Exempt</option>
+              <option>Pending review</option>
+            </select>
+          </div>
+        </div>
+        <label>Notes</label>
+        <textarea id="fundNotes" placeholder="Add details for school administration and records."></textarea>
+        <button id="addFundBtn">Add fundraiser record</button>
+
+        <div class="section">
+          <h3>Compliance Notes</h3>
+          <p class="small">
+            Smart Snacks records should include nutrition facts and ingredients for competitive foods sold during the school day,
+            along with evidence that the item meets school nutrition rules. Keep fundraiser and sales records together for reporting.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section grid cols-3">
+      <div class="card">
+        <h2>Smart Snacks Records</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Brand</th>
+              <th>Specs</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="smartBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Fundraiser Log</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="fundBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Month-End Reporting</h2>
+        <div class="small">
+          This page automatically calculates total sales, current stock, and profit summary to support month-end reporting and school audits.
+        </div>
+        <div class="section">
+          <div class="stat"><div class="n" id="statOrders">0</div><div class="l">Orders logged</div></div>
+        </div>
+        <div class="section">
+          <button class="info" id="downloadReportBtn">Download weekly report CSV</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const KEY = 'snackBusinessDashboardV1';
+    const state = JSON.parse(localStorage.getItem(KEY) || 'null') || {
+      inventory: [{name:'Chips', cost:0.50, price:1.00, stock:20, alert:5}],
+      sales: [],
+      smart: [],
+      fundraisers: []
+    };
+
+    const $ = id => document.getElementById(id);
+    const money = n => '$' + Number(n || 0).toFixed(2);
+    const safe = v => String(v ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
+
+    function save() {
+      localStorage.setItem(KEY, JSON.stringify(state));
+      $('saveBadge').textContent = '● Saved locally';
+    }
+
+    function recalc() {
+      const stockTotal = state.inventory.reduce((a,s)=>a + Number(s.stock||0), 0);
+      const revenue = state.sales.reduce((a,s)=>a + Number(s.total||0), 0);
+      const profit = state.sales.reduce((a,s)=>a + (Number(s.total||0) - (Number(s.cost||0) * Number(s.qty||0))), 0);
+
+      $('statStock').textContent = stockTotal;
+      $('statRevenue').textContent = money(revenue);
+      $('statProfit').textContent = money(profit);
+      $('statOrders').textContent = state.sales.length;
+    }
+
+    function renderSelect() {
+      const sel = $('orderItem');
+      sel.innerHTML = '';
+      if (!state.inventory.length) {
+        sel.innerHTML = '<option value="">No items yet</option>';
+        return;
+      }
+      state.inventory.forEach((item, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = item.name + ' — ' + money(item.price);
+        sel.appendChild(opt);
+      });
+    }
+
+    function renderInventory() {
+      const body = $('inventoryBody');
+      body.innerHTML = '';
+      state.inventory.forEach((item, i) => {
+        const low = Number(item.stock) <= Number(item.alert || 0);
+        const status = low ? '<span class="pill warn">Low stock</span>' : '<span class="pill">OK</span>';
+        body.insertAdjacentHTML('beforeend', `
+          <tr>
+            <td>${safe(item.name)}</td>
+            <td>${money(item.cost)}</td>
+            <td>${money(item.price)}</td>
+            <td>${Number(item.stock || 0)}</td>
+            <td>${status}</td>
+            <td>
+              <div class="actions">
+                <button class="secondary" onclick="changeStock(${i}, -1)">-1</button>
+                <button class="secondary" onclick="changeStock(${i}, 1)">+1</button>
+                <button class="danger" onclick="removeItem(${i})">Remove</button>
+              </div>
+            </td>
+          </tr>
+        `);
+      });
+    }
+
+    function renderSales() {
+      const body = $('salesBody');
+      body.innerHTML = '';
+      state.sales.slice().reverse().forEach(row => {
+        body.insertAdjacentHTML('beforeend', `
+          <tr>
+            <td>${safe(row.timestamp)}</td>
+            <td>${safe(row.customer)}</td>
+            <td>${safe(row.item)}</td>
+            <td>${row.qty}</td>
+            <td>${safe(row.paid)}</td>
+            <td>${money(row.total)}</td>
+          </tr>
+        `);
+      });
+    }
+
+    function renderSmart() {
+      const body = $('smartBody');
+      body.innerHTML = '';
+      state.smart.slice().reverse().forEach(row => {
+        body.insertAdjacentHTML('beforeend', `
+          <tr>
+            <td>${safe(row.name)}</td>
+            <td>${safe(row.brand)}</td>
+            <td class="small">Calories: ${safe(row.calories)}<br>Sodium: ${safe(row.sodium)} mg<br>Sugar: ${safe(row.sugar)} g<br><br>${safe(row.notes)}</td>
+            <td>${safe(row.compliance)}</td>
+          </tr>
+        `);
+      });
+    }
+
+    function renderFundraisers() {
+      const body = $('fundBody');
+      body.innerHTML = '';
+      state.fundraisers.slice().reverse().forEach(row => {
+        body.insertAdjacentHTML('beforeend', `
+          <tr>
+            <td>${safe(row.name)}</td>
+            <td>${safe(row.date)}</td>
+            <td>${safe(row.status)}</td>
+            <td class="small">${safe(row.notes)}</td>
+          </tr>
+        `);
+      });
+    }
+
+    function renderAll() {
+      renderSelect();
+      renderInventory();
+      renderSales();
+      renderSmart();
+      renderFundraisers();
+      recalc();
+    }
+
+    window.changeStock = function(i, delta) {
+      const item = state.inventory[i];
+      if (!item) return;
+      item.stock = Math.max(0, Number(item.stock || 0) + delta);
+      save();
+      renderAll();
+    };
+
+    window.removeItem = function(i) {
+      if (!confirm('Remove this snack item?')) return;
+      state.inventory.splice(i, 1);
+      save();
+      renderAll();
+    };
+
+    $('addItemBtn').onclick = () => {
+      const name = $('itemName').value.trim();
+      if (!name) return alert('Enter a snack name.');
+      state.inventory.push({
+        name,
+        cost: Number($('itemCost').value || 0),
+        price: Number($('itemPrice').value || 0),
+        stock: Number($('itemStock').value || 0),
+        alert: Number($('itemAlert').value || 5)
+      });
+      $('itemName').value = '';
+      $('itemCost').value = '';
+      $('itemPrice').value = '';
+      $('itemStock').value = '';
+      $('itemAlert').value = '';
+      save();
+      renderAll();
+    };
+
+    $('addOrderBtn').onclick = () => {
+      const customer = $('orderCustomer').value.trim();
+      const idx = Number($('orderItem').value);
+      const qty = Math.max(1, Number($('orderQty').value || 1));
+      const paid = $('orderPaid').value;
+      const item = state.inventory[idx];
+      if (!customer) return alert('Enter the customer name.');
+      if (!item) return alert('Choose an item.');
+      if (Number(item.stock || 0) < qty) return alert('Not enough stock.');
+
+      item.stock -= qty;
+      const total = Number(item.price || 0) * qty;
+      state.sales.push({
+        timestamp: new Date().toLocaleString(),
+        customer,
+        item: item.name,
+        qty,
+        paid,
+        total,
+        cost: Number(item.cost || 0) * qty
+      });
+
+      $('orderCustomer').value = '';
+      $('orderQty').value = 1;
+      save();
+      renderAll();
+    };
+
+    $('addSmartBtn').onclick = () => {
+      const name = $('smartName').value.trim();
+      if (!name) return alert('Enter a product name.');
+      state.smart.push({
+        name,
+        brand: $('smartBrand').value.trim(),
+        calories: $('smartCalories').value,
+        sodium: $('smartSodium').value,
+        sugar: $('smartSugar').value,
+        compliance: $('smartCompliance').value,
+        notes: $('smartNotes').value.trim()
+      });
+      ['smartName','smartBrand','smartCalories','smartSodium','smartSugar','smartNotes'].forEach(id => $(id).value = '');
+      $('smartCompliance').value = 'Smart Snacks Compliant';
+      save();
+      renderAll();
+    };
+
+    $('addFundBtn').onclick = () => {
+      const name = $('fundName').value.trim();
+      if (!name) return alert('Enter a fundraiser name.');
+      state.fundraisers.push({
+        name,
+        date: $('fundDate').value || new Date().toLocaleDateString(),
+        status: $('fundStatus').value,
+        notes: $('fundNotes').value.trim()
+      });
+      $('fundName').value = '';
+      $('fundDate').value = '';
+      $('fundNotes').value = '';
+      $('fundStatus').value = 'Non-exempt';
+      save();
+      renderAll();
+    };
+
+    function csvEscape(v) {
+      return '"' + String(v ?? '').replaceAll('"', '""') + '"';
+    }
+
+    function makeCSV() {
+      const lines = [];
+      lines.push(['Section','Field1','Field2','Field3','Field4','Field5','Field6'].join(','));
+
+      state.inventory.forEach(i => lines.push([
+        'Inventory', i.name, i.cost, i.price, i.stock, i.alert, ''
+      ].map(csvEscape).join(',')));
+
+      state.sales.forEach(s => lines.push([
+        'Sales', s.timestamp, s.customer, s.item, s.qty, s.paid, s.total
+      ].map(csvEscape).join(',')));
+
+      state.smart.forEach(s => lines.push([
+        'Smart Snacks', s.name, s.brand, s.calories, s.sodium, s.sugar, s.compliance
+      ].map(csvEscape).join(',')));
+
+      state.fundraisers.forEach(f => lines.push([
+        'Fundraisers', f.name, f.date, f.status, f.notes, '', ''
+      ].map(csvEscape).join(',')));
+
+      return lines.join('\n');
+    }
+
+    $('exportBtn').onclick = () => {
+      const blob = new Blob([makeCSV()], {type:'text/csv'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'snack-business-report.csv';
+      a.click();
+    };
+
+    $('downloadReportBtn').onclick = () => {
+      const blob = new Blob([makeCSV()], {type:'text/csv'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'weekly-snack-report.csv';
+      a.click();
+    };
+
+    $('resetBtn').onclick = () => {
+      if (!confirm('Reset all saved data?')) return;
+      localStorage.removeItem(KEY);
+      location.reload();
+    };
+
+    renderAll();
+  </script>
+</body>
+</html>
