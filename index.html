@@ -147,9 +147,7 @@
           <div class="stat"><div class="n" id="statProfit">$0.00</div><div class="l">Net profit</div></div>
           <div class="stat"><div class="n" id="statMade">$0.00</div><div class="l">Money made</div></div>
           <div class="stat"><div class="n" id="statLost">$0.00</div><div class="l">Money lost</div></div>
-          <!-- FIX 1: Was showing the same netProfit value as statProfit (duplicate).
-               Now shows total unpaid/owed revenue, which is actually useful. -->
-          <div class="stat"><div class="n" id="statNet">$0.00</div><div class="l">Unpaid owed</div></div>
+          <div class="stat"><div class="n" id="statNet">$0.00</div><div class="l">Net result</div></div>
         </div>
 
         <div class="section grid cards-3">
@@ -294,21 +292,19 @@
     }
 
     function recalc() {
-      const stockTotal = state.inventory.reduce((a,s)=>a + Number(s.stock || 0), 0);
-      const revenue = state.sales.reduce((a,s)=>a + Number(s.total || 0), 0);
-      const cost = state.sales.reduce((a,s)=>a + Number(s.cost || 0), 0);
-      const moneyMade = revenue - cost;
-      const moneyLost = state.inventory.reduce((a,s)=>a + (Number(s.missing || 0) * Number(s.cost || 0)), 0);
+      const stockTotal = state.inventory.reduce((a, s) => a + Number(s.stock || 0), 0);
+      const revenue = state.sales.reduce((a, s) => a + Number(s.total || 0), 0);
+      const soldCost = state.sales.reduce((a, s) => a + Number(s.cost || 0), 0);
+      const moneyMade = revenue - soldCost;
+      const moneyLost = state.inventory.reduce((a, s) => a + (Number(s.missing || 0) * Number(s.cost || 0)), 0);
       const netProfit = moneyMade - moneyLost;
-      // FIX 1: Calculate unpaid owed (replaces the duplicate netProfit shown in statNet)
-      const unpaidOwed = state.sales.filter(s => s.paid === 'No').reduce((a,s)=>a + Number(s.total || 0), 0);
 
       $('statStock').textContent = stockTotal;
       $('statRevenue').textContent = money(revenue);
-      $('statProfit').textContent = money(netProfit);
       $('statMade').textContent = money(moneyMade);
       $('statLost').textContent = money(moneyLost);
-      $('statNet').textContent = money(unpaidOwed); // FIX 1: was money(netProfit) — duplicate of statProfit
+      $('statNet').textContent = money(netProfit);
+      $('statProfit').textContent = money(netProfit);
       $('statOrders').textContent = state.sales.length;
     }
 
@@ -408,10 +404,6 @@
       if (!item) return;
       item.missing = Math.max(0, Number(value || 0));
       save();
-      // FIX 2: Added renderInventory() so the input visually snaps to 0
-      // when a negative number is typed (was only calling recalc before,
-      // leaving the displayed input out of sync with the clamped value).
-      renderInventory();
       recalc();
     };
 
